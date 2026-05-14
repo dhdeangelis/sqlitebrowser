@@ -2089,13 +2089,13 @@ void MainWindow::logSql(const QString& sql, int msgtype)
 // Ask user to save the buffer in the specified tab index.
 // ignoreUnattachedBuffers is used to store answer about buffers not linked to files, so user is only asked once about them.
 // Return true unless user wants to cancel the invoking action.
-bool MainWindow::askSaveSqlTab(int index, bool& ignoreUnattachedBuffers)
+bool MainWindow::askSaveSqlTab(int index, bool& ignoreUnattachedBuffers, bool singleTabClose)
 {
     SqlExecutionArea* sqlExecArea = qobject_cast<SqlExecutionArea*>(ui->tabSqlAreas->widget(index));
     const bool isPromptSQLTabsInNewProject = Settings::getValue("General", "promptsqltabsinnewproject").toBool();
 
     if(sqlExecArea->getEditor()->isModified()) {
-        if(sqlExecArea->fileName().isEmpty() && !ignoreUnattachedBuffers && isPromptSQLTabsInNewProject) {
+        if(sqlExecArea->fileName().isEmpty() && !ignoreUnattachedBuffers && (singleTabClose || isPromptSQLTabsInNewProject)) {
             // Once the project is saved, remaining SQL tabs will not be modified, so this is only expected to be asked once.
             QString message = currentProjectFilename.isEmpty() ?
                 tr("Do you want to save the changes made to SQL tabs in a new project file?") :
@@ -2154,7 +2154,7 @@ void MainWindow::closeSqlTab(int index, bool force, bool askSaving)
     }
     // Ask for saving and comply with cancel answer.
     bool ignoreUnattachedBuffers = false;
-    if (askSaving && !askSaveSqlTab(index, ignoreUnattachedBuffers))
+    if (askSaving && !askSaveSqlTab(index, ignoreUnattachedBuffers, true))
         return;
     // Remove the tab and delete the widget
     QWidget* w = ui->tabSqlAreas->widget(index);
