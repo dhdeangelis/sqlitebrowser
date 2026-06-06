@@ -479,8 +479,7 @@ bool DBBrowserDB::tryEncryptionSettings(const QString& filePath, bool* encrypted
 
             // Being in a while loop, we don't want to check the same file multiple times
             if (!isDotenvChecked) {
-                QFile databaseFile(filePath);
-                QFileInfo databaseFileInfo(databaseFile);
+                QFileInfo databaseFileInfo(filePath);
 
                 QString databaseDirectoryPath = databaseFileInfo.dir().path();
                 QString databaseFileName(databaseFileInfo.fileName());
