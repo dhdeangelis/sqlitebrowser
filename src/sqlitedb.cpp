@@ -485,33 +485,36 @@ bool DBBrowserDB::tryEncryptionSettings(const QString& filePath, bool* encrypted
                 const QString databaseFileName(databaseFileInfo.fileName());
 
                 const QString dotenvFilePath = databaseDirectoryPath + "/.env";
-                const QSettings dotenv(dotenvFilePath, QSettings::IniFormat);
 
-                const QVariant passwordValue = dotenv.value(databaseFileName);
+                if (QFile::exists(dotenvFilePath)) {
+                    const QSettings dotenv(dotenvFilePath, QSettings::IniFormat);
 
-                foundDotenvPassword = !passwordValue.isNull();
-                isDotenvChecked = true;
+                    const QVariant passwordValue = dotenv.value(databaseFileName);
 
-                if (foundDotenvPassword)
-                {
-                    const std::string password = passwordValue.toString().toStdString();
+                    foundDotenvPassword = !passwordValue.isNull();
+                    isDotenvChecked = true;
 
-                    const QVariant keyFormatValue = dotenv.value(databaseFileName + "_keyFormat", QVariant(CipherSettings::KeyFormats::Passphrase));
-                    const CipherSettings::KeyFormats keyFormat = CipherSettings::getKeyFormat(keyFormatValue.toInt());
+                    if (foundDotenvPassword)
+                    {
+                        const std::string password = passwordValue.toString().toStdString();
 
-                    const int pageSize = dotenv.value(databaseFileName + "_pageSize", enc_default_page_size).toInt();
-                    const int kdfIterations = dotenv.value(databaseFileName + "_kdfIter", enc_default_kdf_iter).toInt();
-                    const int plaintextHeaderSize = dotenv.value(databaseFileName + "_plaintextHeaderSize", enc_default_plaintext_header_size).toInt();
-                    const std::string hmacAlgorithm = dotenv.value(databaseFileName + "_hmacAlgorithm", QString::fromStdString(enc_default_hmac_algorithm)).toString().toStdString();
-                    const std::string kdfAlgorithm = dotenv.value(databaseFileName + "_kdfAlgorithm", QString::fromStdString(enc_default_kdf_algorithm)).toString().toStdString();
+                        const QVariant keyFormatValue = dotenv.value(databaseFileName + "_keyFormat", QVariant(CipherSettings::KeyFormats::Passphrase));
+                        const CipherSettings::KeyFormats keyFormat = CipherSettings::getKeyFormat(keyFormatValue.toInt());
 
-                    cipherSettings->setKeyFormat(keyFormat);
-                    cipherSettings->setPassword(password);
-                    cipherSettings->setPageSize(pageSize);
-                    cipherSettings->setKdfIterations(kdfIterations);
-                    cipherSettings->setHmacAlgorithm("HMAC_" + hmacAlgorithm);
-                    cipherSettings->setKdfAlgorithm("PBKDF2_HMAC_" + kdfAlgorithm);
-                    cipherSettings->setPlaintextHeaderSize(plaintextHeaderSize);
+                        const int pageSize = dotenv.value(databaseFileName + "_pageSize", enc_default_page_size).toInt();
+                        const int kdfIterations = dotenv.value(databaseFileName + "_kdfIter", enc_default_kdf_iter).toInt();
+                        const int plaintextHeaderSize = dotenv.value(databaseFileName + "_plaintextHeaderSize", enc_default_plaintext_header_size).toInt();
+                        const std::string hmacAlgorithm = dotenv.value(databaseFileName + "_hmacAlgorithm", QString::fromStdString(enc_default_hmac_algorithm)).toString().toStdString();
+                        const std::string kdfAlgorithm = dotenv.value(databaseFileName + "_kdfAlgorithm", QString::fromStdString(enc_default_kdf_algorithm)).toString().toStdString();
+
+                        cipherSettings->setKeyFormat(keyFormat);
+                        cipherSettings->setPassword(password);
+                        cipherSettings->setPageSize(pageSize);
+                        cipherSettings->setKdfIterations(kdfIterations);
+                        cipherSettings->setHmacAlgorithm("HMAC_" + hmacAlgorithm);
+                        cipherSettings->setKdfAlgorithm("PBKDF2_HMAC_" + kdfAlgorithm);
+                        cipherSettings->setPlaintextHeaderSize(plaintextHeaderSize);
+                    }
                 }
             }
 
