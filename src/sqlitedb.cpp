@@ -16,6 +16,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QRegularExpression>
+#include <QSettings>
 
 #include <algorithm>
 #include <array>
