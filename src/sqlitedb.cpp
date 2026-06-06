@@ -479,31 +479,31 @@ bool DBBrowserDB::tryEncryptionSettings(const QString& filePath, bool* encrypted
 
             // Being in a while loop, we don't want to check the same file multiple times
             if (!isDotenvChecked) {
-                QFileInfo databaseFileInfo(filePath);
+                const QFileInfo databaseFileInfo(filePath);
 
-                QString databaseDirectoryPath = databaseFileInfo.dir().path();
-                QString databaseFileName(databaseFileInfo.fileName());
+                const QString databaseDirectoryPath = databaseFileInfo.dir().path();
+                const QString databaseFileName(databaseFileInfo.fileName());
 
-                QString dotenvFilePath = databaseDirectoryPath + "/.env";
-                QSettings dotenv(dotenvFilePath, QSettings::IniFormat);
+                const QString dotenvFilePath = databaseDirectoryPath + "/.env";
+                const QSettings dotenv(dotenvFilePath, QSettings::IniFormat);
 
-                QVariant passwordValue = dotenv.value(databaseFileName);
+                const QVariant passwordValue = dotenv.value(databaseFileName);
 
                 foundDotenvPassword = !passwordValue.isNull();
                 isDotenvChecked = true;
 
                 if (foundDotenvPassword)
                 {
-                    std::string password = passwordValue.toString().toStdString();
+                    const std::string password = passwordValue.toString().toStdString();
 
-                    QVariant keyFormatValue = dotenv.value(databaseFileName + "_keyFormat", QVariant(CipherSettings::KeyFormats::Passphrase));
-                    CipherSettings::KeyFormats keyFormat = CipherSettings::getKeyFormat(keyFormatValue.toInt());
+                    const QVariant keyFormatValue = dotenv.value(databaseFileName + "_keyFormat", QVariant(CipherSettings::KeyFormats::Passphrase));
+                    const CipherSettings::KeyFormats keyFormat = CipherSettings::getKeyFormat(keyFormatValue.toInt());
 
-                    int pageSize = dotenv.value(databaseFileName + "_pageSize", enc_default_page_size).toInt();
-                    int kdfIterations = dotenv.value(databaseFileName + "_kdfIter", enc_default_kdf_iter).toInt();
-                    int plaintextHeaderSize = dotenv.value(databaseFileName + "_plaintextHeaderSize", enc_default_plaintext_header_size).toInt();
-                    std::string hmacAlgorithm = dotenv.value(databaseFileName + "_hmacAlgorithm", QString::fromStdString(enc_default_hmac_algorithm)).toString().toStdString();
-                    std::string kdfAlgorithm = dotenv.value(databaseFileName + "_kdfAlgorithm", QString::fromStdString(enc_default_kdf_algorithm)).toString().toStdString();
+                    const int pageSize = dotenv.value(databaseFileName + "_pageSize", enc_default_page_size).toInt();
+                    const int kdfIterations = dotenv.value(databaseFileName + "_kdfIter", enc_default_kdf_iter).toInt();
+                    const int plaintextHeaderSize = dotenv.value(databaseFileName + "_plaintextHeaderSize", enc_default_plaintext_header_size).toInt();
+                    const std::string hmacAlgorithm = dotenv.value(databaseFileName + "_hmacAlgorithm", QString::fromStdString(enc_default_hmac_algorithm)).toString().toStdString();
+                    const std::string kdfAlgorithm = dotenv.value(databaseFileName + "_kdfAlgorithm", QString::fromStdString(enc_default_kdf_algorithm)).toString().toStdString();
 
                     cipherSettings->setKeyFormat(keyFormat);
                     cipherSettings->setPassword(password);
