@@ -2096,11 +2096,17 @@ bool MainWindow::askSaveSqlTab(int index, bool& ignoreUnattachedBuffers, bool si
 
     if(sqlExecArea->getEditor()->isModified()) {
         if(sqlExecArea->fileName().isEmpty() && !ignoreUnattachedBuffers && (singleTabClose || isPromptSQLTabsInNewProject)) {
-            // Once the project is saved, remaining SQL tabs will not be modified, so this is only expected to be asked once.
-            QString message = currentProjectFilename.isEmpty() ?
-                tr("Do you want to save the changes made to SQL tabs in a new project file?") :
-                tr("Do you want to save the changes made to SQL tabs in the project file '%1'?").
-                arg(QFileInfo(currentProjectFilename).fileName());
+            // For single-tab closes, always prompt with singular wording.
+            // For bulk closes, only asked once after project save.
+            QString message = singleTabClose ?
+                (currentProjectFilename.isEmpty() ?
+                    tr("Do you want to save the changes made to this SQL tab in a new project file?") :
+                    tr("Do you want to save the changes made to this SQL tab in the project file '%1'?").
+                    arg(QFileInfo(currentProjectFilename).fileName())) :
+                (currentProjectFilename.isEmpty() ?
+                    tr("Do you want to save the changes made to SQL tabs in a new project file?") :
+                    tr("Do you want to save the changes made to SQL tabs in the project file '%1'?").
+                    arg(QFileInfo(currentProjectFilename).fileName()));
             QMessageBox::StandardButton reply = QMessageBox::question(nullptr,
                                                                       QApplication::applicationName(),
                                                                       message,
