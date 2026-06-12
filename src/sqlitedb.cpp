@@ -526,13 +526,17 @@ bool DBBrowserDB::tryEncryptionSettings(const QString& filePath, bool* encrypted
                     // Deprecated: legacy .env in the database directory only. Remove once .db4s.env is adopted.
                     foundDotenvPassword = tryLoadDotenv(databaseDirectory.filePath(".env"));
 
-                    QDir searchDirectory(databaseDirectory);
-                    while (!foundDotenvPassword && searchDirectory.cdUp())
+                    // Parent folder search is opt-in because it can slow down opening encrypted databases.
+                    if (!foundDotenvPassword && Settings::getValue("db", "sqlcipherparentdotenvlookup").toBool())
                     {
-                        if (tryLoadDotenv(searchDirectory.filePath(".db4s.env")))
+                        QDir searchDirectory(databaseDirectory);
+                        while (searchDirectory.cdUp())
                         {
-                            foundDotenvPassword = true;
-                            break;
+                            if (tryLoadDotenv(searchDirectory.filePath(".db4s.env")))
+                            {
+                                foundDotenvPassword = true;
+                                break;
+                            }
                         }
                     }
                 }
