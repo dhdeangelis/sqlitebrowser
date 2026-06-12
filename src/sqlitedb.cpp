@@ -481,7 +481,7 @@ bool DBBrowserDB::tryEncryptionSettings(const QString& filePath, bool* encrypted
             if (!isDotenvChecked) {
                 const QFileInfo databaseFileInfo(filePath);
 
-                QDir searchDirectory(databaseFileInfo.absoluteDir());
+                const QDir databaseDirectory(databaseFileInfo.absoluteDir());
                 const QString databaseFileName(databaseFileInfo.fileName());
 
                 auto tryLoadDotenv = [&](const QString& dotenvFilePath) -> bool {
@@ -516,17 +516,25 @@ bool DBBrowserDB::tryEncryptionSettings(const QString& filePath, bool* encrypted
                     return true;
                 };
 
-                while (true)
-                {
-                    const QString dotenvFilePath = searchDirectory.filePath(".env");
-                    if (tryLoadDotenv(dotenvFilePath))
-                    {
-                        foundDotenvPassword = true;
-                        break;
-                    }
+                const QString db4sEnvPath = databaseDirectory.filePath(".db4s.env");
+                const bool hasDB4SEnv = QFile::exists(db4sEnvPath);
 
-                    if (!searchDirectory.cdUp())
-                        break;
+                if (hasDB4SEnv)
+                {
+                    foundDotenvPassword = tryLoadDotenv(db4sEnvPath);
+                } else {
+                    // Deprecated: legacy .env in the database directory only. Remove once .db4s.env is adopted.
+                    foundDotenvPassword = tryLoadDotenv(databaseDirectory.filePath(".env"));
+
+                    QDir searchDirectory(databaseDirectory);
+                    while (!foundDotenvPassword && searchDirectory.cdUp())
+                    {
+                        if (tryLoadDotenv(searchDirectory.filePath(".db4s.env")))
+                        {
+                            foundDotenvPassword = true;
+                            break;
+                        }
+                    }
                 }
 
                 isDotenvChecked = true;
